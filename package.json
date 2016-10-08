@@ -1,0 +1,17 @@
+{
+  "name": "sgj_focus",
+  "description": "Html Custom Elements which manages a high level focus and events on HTML Custom Elements children for UI such as mobiles/STB/realTimeDevices",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": {
+    "name": "François Chabrou",
+    "email": "developer@stopgapjs.org",
+    "url": "http://www.stopgapjs.org"
+  },
+  "main": "./js/focusable.js",
+  "homepage": "http://www.stopgapjs.org/#focus",
+  "dependencies": {
+    "requirejs": ">=2.1.14",
+  },
+  "readme": "#stopgapjs"
+}
