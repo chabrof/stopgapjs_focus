@@ -30,5 +30,5 @@ interface SgjFocusable extends HTMLElement {
 }
 
 interface Document {
-  registerFocusable(markup :string, proro :any)
+  registerElement(markup :string, proro :any)
 }

@@ -165,5 +165,5 @@ EltPrototype.attributeChangedCallback = function(attrName/*, oldVal, newVal*/) {
 
 export function register(mustache) {
   Mustache = mustache
-  document.registerFocusable('sgj-focusmgr', { prototype: EltPrototype });
+  document.registerElement('sgj-focusmgr', { prototype: EltPrototype });
 }

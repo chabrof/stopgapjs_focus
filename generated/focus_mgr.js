@@ -90,7 +90,7 @@ define(["require", "exports"], function (require, exports) {
     };
     function register(mustache) {
         Mustache = mustache;
-        document.registerFocusable('sgj-focusmgr', { prototype: EltPrototype });
+        document.registerElement('sgj-focusmgr', { prototype: EltPrototype });
     }
     exports.register = register;
 });
