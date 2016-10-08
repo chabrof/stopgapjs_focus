@@ -3,7 +3,9 @@ define(["require", "exports"], function (require, exports) {
     var Mustache;
     exports.EltPrototype = Object.create(HTMLElement.prototype);
     exports.EltPrototype._init = function (config) {
+        this._focusMgr = null;
         this._focusMgr = this._findFocusMgr();
+        console.assert(this._focusMgr);
         this.focused = false;
         this.config = config ? config : {};
         this._domId = ((config && config.domId) ? config.domId : this.uIdx);
@@ -15,6 +17,14 @@ define(["require", "exports"], function (require, exports) {
         this._focusMgr.addFocusable(this);
     };
     exports.EltPrototype._findFocusMgr = function () {
+        var curElt = this;
+        while (curElt = curElt.parentElement) {
+            if (curElt._focusMgr) {
+                console.log('curElt', curElt);
+                return curElt._focusMgr;
+            }
+        }
+        return null;
     };
     exports.EltPrototype.getFocusMgr = function () {
         return this._focusMgr;

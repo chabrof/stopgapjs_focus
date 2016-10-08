@@ -4,10 +4,12 @@ let Mustache;
 export let EltPrototype :SgjFocusable = <SgjFocusable>Object.create(HTMLElement.prototype);
 
 EltPrototype._init = function(config) {
+  this._focusMgr = null;
   this._focusMgr = this._findFocusMgr()
+  console.assert(this._focusMgr)
+
   this.focused = false
   this.config = config ? config : {}
-  //this.oneChildFocused = false;
   this._domId = ((config && config.domId) ? config.domId : this.uIdx)
   this._shown = true
 
@@ -21,7 +23,14 @@ EltPrototype._init = function(config) {
 
 EltPrototype._findFocusMgr = function() :SgjFocusMgr {
 
-
+  let curElt :SgjFocusable = this;
+  while (curElt = curElt.parentElement as SgjFocusable) { // '=' because assign
+    if (curElt._focusMgr) {
+      console.log('curElt' , curElt)
+      return curElt._focusMgr
+    }
+  }
+  return null;
 }
 
 EltPrototype.getFocusMgr = function() {
@@ -32,6 +41,7 @@ EltPrototype.attachedCallback = function() {
   console.log('attach')
   this._init();
 }
+
 
 EltPrototype.detachedCallback = function() {
 }

@@ -20,6 +20,7 @@ interface SgjFocusable extends HTMLElement {
   _init(config :any) :void,
   _focus() :void,
   _blur() :void,
+  _findFocusMgr() :SgjFocusMgr,
   getParent() :SgjFocusable,
   getFocusMgr() :SgjFocusMgr,
   createdCallback(),

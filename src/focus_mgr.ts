@@ -9,7 +9,7 @@ EltPrototype._init = function() {
   this._focusables = []
   this._initAttributesMgmt()
   this._curFocusedFocusable = null
-  this._defaultFocusable = this;
+  this._defaultFocusable = this
   this._focusMgr = this // mandatory (the children find focurMgr with this attrib)
 }
 
