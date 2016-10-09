@@ -7,8 +7,6 @@ define(["require", "exports"], function (require, exports) {
         console.assert(this._focusMgr);
         this.focused = false;
         this.config = config ? config : {};
-        this._domId = ((config && config.domId) ? config.domId : this.uIdx);
-        this.setAttribute('id', this._domId);
         this._focusMgr = this._findFocusMgr();
         this._shown = true;
         this._eventListeners = {};
@@ -16,6 +14,8 @@ define(["require", "exports"], function (require, exports) {
             this.focusable = true;
         }
         this._focusMgr.addFocusable(this);
+        this._domId = ((config && config.domId) ? config.domId : this.uIdx);
+        this.setAttribute('id', this._domId);
     };
     exports.EltPrototype._findFocusMgr = function () {
         var curElt = this;

@@ -10,8 +10,7 @@ EltPrototype._init = function(config) {
 
   this.focused = false
   this.config = config ? config : {}
-  this._domId = ((config && config.domId) ? config.domId : this.uIdx)
-  this.setAttribute('id', this._domId)
+
   this._focusMgr = this._findFocusMgr()
   this._shown = true
 
@@ -20,7 +19,9 @@ EltPrototype._init = function(config) {
     this.focusable = true
   }
 
-  this._focusMgr.addFocusable(this)
+  this._focusMgr.addFocusable(this) // add to mgr and get the uIdx
+  this._domId = ((config && config.domId) ? config.domId : this.uIdx)
+  this.setAttribute('id', this._domId)
 }
 
 EltPrototype._findFocusMgr = function() :SgjFocusMgr {
