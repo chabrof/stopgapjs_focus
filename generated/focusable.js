@@ -4,12 +4,12 @@ define(["require", "exports"], function (require, exports) {
     exports.EltPrototype = Object.create(HTMLElement.prototype);
     exports.EltPrototype._init = function (config) {
         this._focusMgr = null;
-        this._focusMgr = this._findFocusMgr();
         console.assert(this._focusMgr);
         this.focused = false;
         this.config = config ? config : {};
         this._domId = ((config && config.domId) ? config.domId : this.uIdx);
         this.setAttribute('id', this._domId);
+        this._focusMgr = this._findFocusMgr();
         this._shown = true;
         this._eventListeners = {};
         if (this.focusable === undefined) {

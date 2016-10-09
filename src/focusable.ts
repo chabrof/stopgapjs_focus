@@ -4,14 +4,15 @@ let Mustache;
 export let EltPrototype :SgjFocusable = <SgjFocusable>Object.create(HTMLElement.prototype);
 
 EltPrototype._init = function(config) {
-  this._focusMgr = null;
-  this._focusMgr = this._findFocusMgr()
+  this._focusMgr = null
+
   console.assert(this._focusMgr)
 
   this.focused = false
   this.config = config ? config : {}
   this._domId = ((config && config.domId) ? config.domId : this.uIdx)
-  this.setAttribute('id', this._domId);
+  this.setAttribute('id', this._domId)
+  this._focusMgr = this._findFocusMgr()
   this._shown = true
 
   this._eventListeners = {}
@@ -24,7 +25,7 @@ EltPrototype._init = function(config) {
 
 EltPrototype._findFocusMgr = function() :SgjFocusMgr {
 
-  let curElt :SgjFocusable = this;
+  let curElt :SgjFocusable = this
   while (curElt = curElt.parentElement as SgjFocusable) { // '=' because assign
     if (curElt._focusMgr) {
       console.log('curElt' , curElt)
