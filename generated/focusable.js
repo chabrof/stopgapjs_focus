@@ -9,6 +9,7 @@ define(["require", "exports"], function (require, exports) {
         this.focused = false;
         this.config = config ? config : {};
         this._domId = ((config && config.domId) ? config.domId : this.uIdx);
+        this.setAttribute('id', this._domId);
         this._shown = true;
         this._eventListeners = {};
         if (this.focusable === undefined) {
