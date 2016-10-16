@@ -2,9 +2,11 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     var Mustache;
     exports.EltPrototype = Object.create(HTMLElement.prototype);
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.default = exports.EltPrototype;
     exports.EltPrototype._init = function (config) {
+        this.sgjFocusable = true;
         this._focusMgr = null;
-        console.assert(this._focusMgr);
         this.focused = false;
         this.config = config ? config : {};
         this._focusMgr = this._findFocusMgr();
@@ -13,9 +15,13 @@ define(["require", "exports"], function (require, exports) {
         if (this.focusable === undefined) {
             this.focusable = true;
         }
+        else {
+            this.focusable = false;
+        }
+        this.customType = 'sgjFocusable';
         this._focusMgr.addFocusable(this);
-        this._domId = ((config && config.domId) ? config.domId : this.uIdx);
-        this.setAttribute('id', this._domId);
+        this.setAttribute('_uIdx', this.uIdx);
+        console.log('INIT :', this, this.uIdx);
     };
     exports.EltPrototype._findFocusMgr = function () {
         var curElt = this;
@@ -30,14 +36,35 @@ define(["require", "exports"], function (require, exports) {
     exports.EltPrototype.getFocusMgr = function () {
         return this._focusMgr;
     };
+    exports.EltPrototype.clear = function () {
+        this.innerHTML = '';
+    };
+    exports.EltPrototype.on_focus = function (event) {
+        if (event.detail.elt.uIdx === this.uIdx) {
+            console.log('Me (' + this.uIdx + '), I have the focus !');
+        }
+        return false;
+    };
+    exports.EltPrototype.on_blur = function (event) {
+        if (event.detail.elt.uIdx === this.uIdx) {
+            console.log('Me (' + this.uIdx + '), I was blurred !');
+        }
+        return false;
+    };
+    exports.EltPrototype.on_select = function (event) {
+        if (event.detail.elt.uIdx === this.uIdx) {
+            console.log('Me (' + this.uIdx + '), I was selected !');
+        }
+        return true;
+    };
     exports.EltPrototype.attachedCallback = function () {
-        console.log('attach');
+        console.log('ATTACH');
         this._init();
     };
     exports.EltPrototype.detachedCallback = function () {
+        console.log('DETACH !');
     };
     exports.EltPrototype.attributeChangedCallback = function (attrName) {
-        console.error('attrib', attrName);
     };
 });
 //# sourceMappingURL=focusable.js.map

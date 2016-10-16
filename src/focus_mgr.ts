@@ -1,6 +1,5 @@
 /// <reference path='focusable.d.ts' />
 
-let Mustache
 let EltPrototype :SgjFocusMgr = <SgjFocusMgr>Object.create(HTMLElement.prototype);
 
 EltPrototype._init = function() {
@@ -10,7 +9,8 @@ EltPrototype._init = function() {
   this._initAttributesMgmt()
   this._curFocusedFocusable = null
   this._defaultFocusable = this
-  this._focusMgr = this // mandatory (the children find focurMgr with this attrib)
+  this._focusMgr = this; // mandatory (the children find focurMgr with this attrib)
+  (window as any).mg = this
 }
 
 EltPrototype._initAttributesMgmt = function() {
@@ -38,8 +38,9 @@ EltPrototype.removeFocusable = function(focusable :SgjFocusable) {
   if (focusable.focused) {
     this.manageFocus();
   }
-  this.log('info wid:' + focusable.uIdx);
-  if (! this._widgets[focusable.uIdx]) this.log(this._widgets);
+  console.log('remove focusable:', focusable.uIdx);
+  if (! this._focusables[focusable.uIdx])
+    throw "The element you try to remove does not exist"
 
   this._focusables[focusable.uIdx].clear();
   delete(this._focusables[focusable.uIdx]);
@@ -74,29 +75,23 @@ EltPrototype.getParent = function() {
  * @return
  */
 EltPrototype.manageFocus = function(focusable :SgjFocusable) {
+  // pre
+
+  console.log('Mgr : give focus to', focusable)
+
   if (! focusable) {
     let locWidget = this._findFirstFocusable();
-    return locWidget.focus();
+    return locWidget ? locWidget.focus() : null;
   }
-
-  let oldAncestors :SgjFocusable[];
-  let newAncestors :SgjFocusable[];
 
   // the focusable which had focus, looses it
   if (this._curFocusedFocusable) {
-    this._curFocusedFocusable._blur();
-    oldAncestors = this.getAncestors(this._curFocusedFocusable);
+    this.dispatchFocusableEvent('blur');
   }
-/*
-  // the new focusable has now the focus
+  // the new element has the focus
   this._curFocusedFocusable = focusable;
-  if (this._curFocusedWidget) {
-    newAncestors = this.getAncestors(this._curFocusedFocusable);
-  }
-
-  // we throw an event "childHasFocus" to ancestors
-  this._throwChildHasFocusEvent(oldAncestors, newAncestors);
-  */
+  // dispath a focus event
+  this.dispatchFocusableEvent('focus');
 };
 
 /**
@@ -107,63 +102,63 @@ EltPrototype.manageFocus = function(focusable :SgjFocusable) {
  */
 EltPrototype._findFirstFocusable = function() {
   //console.assert(this._defaultFocusableWidget, 'firstFocusableWidget does not exist');
-  return this._defaultFocusableWidget;
+  return this._defaultFocusableWidget
 }
 
 /**
  * Dispathes an event according to the focuse management
  * @method dispatchFocusableEvent
- * @param {} event
- * @param {} args
+ * @param {CustomEvent} event
  * @return boolean
  */
-EltPrototype.dispatchFocusableEvent = function(event) {
-  if (this._curFocusedWidget) {
-    let args = Array.prototype.slice.call(arguments)
-    args.shift();
-    return this._bubbleEvent(event, args, this._curFocusedWidget)
+EltPrototype.dispatchFocusableEvent = function(event :any, elt? :SgjFocusable) {
+  elt = (elt ? elt : this._curFocusedFocusable)
+  if (typeof event === 'string') {
+    event = new CustomEvent(event, { 'detail' : { 'elt' : elt } })
   }
-  return false;
+  if (elt) {
+    return this._bubbleFocusableEvent(event, elt)
+  }
+  return false
 }
 
-EltPrototype._bubbleEventOnFocus = function(event, args, focusable :SgjFocusable) {
-  let returnFlg;
-  if (typeof focusable.focusableEvtCbks['on_' + event] === 'function') {
-    returnFlg = focusable.focusableEvtCbks['on_' + event].apply(focusable, args);
+EltPrototype._bubbleFocusableEvent = function(event, focusable :SgjFocusable) {
+  let returnFlg
+  if (typeof focusable['on_' + event.type] === 'function') {
+    returnFlg = focusable['on_' + event.type].call(focusable, event);
   }
   else {
     returnFlg = false;
   }
-  if (!returnFlg && focusable.getParent()) {
-		//this.log('Bubble =>', widget.getParent().id);
-    returnFlg = this._bubbleEventOnFocus(event, args, focusable.getParent());
+  if (!returnFlg && focusable.parentElement) {
+    console.log('Bubble =>', (focusable.parentElement as SgjFocusable).uIdx);
+    returnFlg = this._bubbleFocusableEvent(event, focusable.parentElement);
   }
-  return returnFlg;
+  return returnFlg
 };
 
 /**
  * Get all the SgjFocusable elements managed by this manager
  * @method getFocusables
- * @return {Array of SgjFocusable}
+ * @return {SgjFocusable[]}
  */
 EltPrototype.getFocusables = function() :SgjFocusable[] {
-  return this._widgets;
+  return this._widgets
 };
 
 
 EltPrototype.attachedCallback = function() {
-  console.log('attach');
-  this._init();
+  this._init()
 }
 
 EltPrototype.detachedCallback = function() {
 }
 
 EltPrototype.attributeChangedCallback = function(attrName/*, oldVal, newVal*/) {
-  console.error('attrib', attrName);
+  console.log('attrib', attrName);
 }
 
-export function register(mustache) {
-  Mustache = mustache
-  document.registerElement('sgj-focusmgr', { prototype: EltPrototype });
+export function register(markup :string) {
+  console.assert(markup.length > 0, 'markup must be a non null string')
+  document.registerElement(markup, { prototype: EltPrototype });
 }
