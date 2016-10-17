@@ -58,11 +58,9 @@ define(["require", "exports"], function (require, exports) {
         return true;
     };
     exports.EltPrototype.attachedCallback = function () {
-        console.log('ATTACH');
         this._init();
     };
     exports.EltPrototype.detachedCallback = function () {
-        console.log('DETACH !');
     };
     exports.EltPrototype.attributeChangedCallback = function (attrName) {
     };

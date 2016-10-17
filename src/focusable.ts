@@ -71,13 +71,11 @@ EltPrototype.on_select = function(event :CustomEvent) :boolean {
 }
 
 EltPrototype.attachedCallback = function() {
-  console.log('ATTACH');
   this._init();
 }
 
 
 EltPrototype.detachedCallback = function() {
-  console.log('DETACH !');
 }
 
 EltPrototype.attributeChangedCallback = function(attrName/*, oldVal, newVal*/) {

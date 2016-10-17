@@ -70,33 +70,34 @@ EltPrototype.getSelectedElement = function() :SgjFocusable{
   }
 }
 
-EltPrototype.selectNextElement  = function() :boolean{
+EltPrototype.selectNextElement  = function() :number{
   // pre
   console.assert( this._selectedIdx !== null && this._selectedIdx !== undefined,
                   "No element previously selected on collection")
 
-  if (this._children.length > (this._selectedIdx + 1)) {
-    this.selectElement(this._children[this._selectedIdx + 1])
-    return true
+  let selectIdx = this._selectedIdx + 1
+  if (this._children.length > selectIdx) {
+    this.selectElement(this._children[selectIdx])
+    return selectIdx
   }
 
-  return false
+  return null
 }
 
-EltPrototype.selectPrevElement = function() :boolean{
+EltPrototype.selectPrevElement = function() :number{
   // pre
   console.assert( this._selectedIdx !== null && this._selectedIdx !== undefined,
                   "No element previously selected on collection")
-
-  if ((this._selectedIdx - 1) >= 0) {
-    this.selectElement(this._children[this._selectedIdx - 1])
-    return true
+  let selectIdx = this._selectedIdx - 1
+  if (selectIdx >= 0) {
+    this.selectElement(this._children[selectIdx])
+    return selectIdx
   }
-  return false
+  return null
 }
 
 
-EltPrototype.selectElement = function(element :SgjFocusable) :boolean {
+EltPrototype.selectElement = function(element :SgjFocusable) :number {
   this._initSgjFocusableChildren();
   let tempElement :SgjFocusable
   let oldElement = this._selectedElement
@@ -126,9 +127,9 @@ EltPrototype.selectElement = function(element :SgjFocusable) :boolean {
       this._focusMgr.manageFocus(tempElement)
 
     console.log('Select :', tempElement)
-    return true
+    return tempIdx
   }
-  return false;
+  return null;
 }
 
 EltPrototype.unSelectElement = function(element :SgjFocusable) :boolean {

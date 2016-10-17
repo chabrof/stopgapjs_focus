@@ -59,19 +59,21 @@ define(["require", "exports", "focusable"], function (require, exports, focusabl
     };
     exports.EltPrototype.selectNextElement = function () {
         console.assert(this._selectedIdx !== null && this._selectedIdx !== undefined, "No element previously selected on collection");
-        if (this._children.length > (this._selectedIdx + 1)) {
-            this.selectElement(this._children[this._selectedIdx + 1]);
-            return true;
+        var selectIdx = this._selectedIdx + 1;
+        if (this._children.length > selectIdx) {
+            this.selectElement(this._children[selectIdx]);
+            return selectIdx;
         }
-        return false;
+        return null;
     };
     exports.EltPrototype.selectPrevElement = function () {
         console.assert(this._selectedIdx !== null && this._selectedIdx !== undefined, "No element previously selected on collection");
-        if ((this._selectedIdx - 1) >= 0) {
-            this.selectElement(this._children[this._selectedIdx - 1]);
-            return true;
+        var selectIdx = this._selectedIdx - 1;
+        if (selectIdx >= 0) {
+            this.selectElement(this._children[selectIdx]);
+            return selectIdx;
         }
-        return false;
+        return null;
     };
     exports.EltPrototype.selectElement = function (element) {
         this._initSgjFocusableChildren();
@@ -100,9 +102,9 @@ define(["require", "exports", "focusable"], function (require, exports, focusabl
             }), tempElement);
             this._focusMgr.manageFocus(tempElement);
             console.log('Select :', tempElement);
-            return true;
+            return tempIdx;
         }
-        return false;
+        return null;
     };
     exports.EltPrototype.unSelectElement = function (element) {
         console.assert(element !== undefined && element !== null, 'element must be given');

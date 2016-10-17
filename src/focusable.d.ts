@@ -40,9 +40,9 @@ interface SgjFocusable extends HTMLElement {
 interface SgjFocusableCollection extends SgjFocusable {
   _focusableChildren :SgjFocusable[]
   _selectedElement :SgjFocusable
-  selectElement(element :SgjFocusable) :boolean
-  selectNextElement(element :SgjFocusable) :boolean
-  selectPrevElement(element :SgjFocusable) :boolean
+  selectElement(element :SgjFocusable) :number
+  selectNextElement(element :SgjFocusable) :number
+  selectPrevElement(element :SgjFocusable) :number
   unSelectElement(element :SgjFocusable) :boolean
   on_oneChildFocused(event :CustomEvent) :boolean
   getSelectedElement() :SgjFocusable
