@@ -1,82 +1,145 @@
-/// <reference path='focusable.d.ts' />
+import {SgjFocusMgr} from "focus_mgr"
 
-let Mustache;
-export let EltPrototype :SgjFocusable = <SgjFocusable>Object.create(HTMLElement.prototype);
-export default EltPrototype;
+export default class SgjFocusable extends HTMLElement {
 
-EltPrototype._init = function(config) {
-  this.sgjFocusable = true;
-  this._focusMgr = null
+  public    sgjFocusable :boolean
+  protected _focusMgr :SgjFocusMgr
+  public    focused :boolean
+  public    focusedChild :boolean
+  protected _logPrefix :string
+  protected _console :Console
+  public    debugName :string
+  protected _shown :boolean
+  public    focusable :boolean
+  protected _eventListeners :any
+  public    customType :string
+  public    uIdx :number
+  protected _enable :boolean
 
-  this.focused = false
-  this.config = config ? config : {}
+  protected _init() {
+    this.sgjFocusable = true;
+    this._focusMgr = null
 
-  this._focusMgr = this._findFocusMgr()
-  this._shown = true
+    this.focused = false
+    this.focusedChild = false
 
-  this._eventListeners = {}
-  if (this.focusable === undefined) {
-    this.focusable = true
+    this._focusMgr = this._findFocusMgr()
+    this._logPrefix = "SgjFocusable :"
+    this._console = this._focusMgr._console
+    this._shown = true
+    this.debugName = this.nodeName.toLowerCase() + ' (' + (this.getAttribute('id') ? this.getAttribute('id') + ' ,' : '') + '/*uidx not set for the moment*/' + ')'
+    this._eventListeners = {}
+    if (this.focusable === undefined) {
+      this.focusable = true
+    }
+    else {
+      this.focusable = false
+    }
+    this.customType = 'SgjFocusable'
+
+    // attributes management
+    let enableFlag = (this.getAttribute('data-enable') === 'false' ||  this.getAttribute('data-enable') === '0') ? false : true
+    this.setEnableFlag(enableFlag)
+
+    // at the end of _init we add ourselves to the manager
+    this._focusMgr.addFocusable(this) // add to mgr and get the uIdx
+    this.setAttribute('uIdx', this.uIdx.toString())
+
+    // update the debugName with the uIdx set
+    this.debugName = this.nodeName.toLowerCase() + ' (' + (this.getAttribute('id') ? this.getAttribute('id') + ' ,' : '') + this.uIdx + ')' // to update after adding
+
+    this._console.log(this._logPrefix, 'Init :', this, this.uIdx)
   }
-  else {
-    this.focusable = false
-  }
-  this.customType = 'sgjFocusable'
 
-  this._focusMgr.addFocusable(this) // add to mgr and get the uIdx
+  public setEnableFlag(enableFlag :boolean, displayStyle :string = '') {
+    this._enable = enableFlag
 
-  this.setAttribute('_uIdx', this.uIdx)
-  console.log('INIT :', this, this.uIdx)
-}
-
-EltPrototype._findFocusMgr = function() :SgjFocusMgr {
-
-  let curElt :SgjFocusable = this
-  while (curElt = curElt.parentElement as SgjFocusable) { // '=' because assign
-    if (curElt._focusMgr) {
-      console.log('curElt' , curElt)
-      return curElt._focusMgr
+    if (! this._enable) {
+      this.style.display = "none"
+      this.setAttribute('data-enable', 'false')
+    }
+    else {
+      this.style.display = displayStyle
+      this.setAttribute('data-enable', 'true')
     }
   }
-  return null;
-}
 
-EltPrototype.getFocusMgr = function() {
-  return this._focusMgr
-}
-
-EltPrototype.clear = function() {
-  this.innerHTML = ''
-}
-
-EltPrototype.on_focus = function(event :CustomEvent) :boolean {
-  if (event.detail.elt.uIdx === this.uIdx) {
-    console.log('Me (' + this.uIdx + '), I have the focus !')
+  public isEnabled() :boolean {
+    return this._enable
   }
-  return false // we buble the event in order to inform my parent that I have the focus
-}
 
-EltPrototype.on_blur = function(event :CustomEvent) :boolean {
-  if (event.detail.elt.uIdx === this.uIdx) {
-    console.log('Me (' + this.uIdx + '), I was blurred !')
+  public getParent(elt = null) :SgjFocusable {
+    let parentElement :SgjFocusable = (elt ? elt.parentElement : this.parentElement);
+
+    if (! parentElement) {
+      return null
+    }
+
+    return parentElement.focusable ? parentElement : this.getParent(parentElement) // if parent is not a focusable element (such as a std HTML markup) we go upper recursively
   }
-  return false // we buble the event in order to inform my parent that I have the focus
-}
 
-EltPrototype.on_select = function(event :CustomEvent) :boolean {
-  if (event.detail.elt.uIdx === this.uIdx) {
-    console.log('Me (' + this.uIdx + '), I was selected !')
+  protected _findFocusMgr() :SgjFocusMgr {
+
+    let curElt :SgjFocusable = this
+    while (curElt = curElt.parentElement as SgjFocusable) { // '=' because assign
+      if (curElt._focusMgr) {
+        return curElt._focusMgr
+      }
+    }
+    return null;
   }
-  return true // we does not fire
-}
 
-EltPrototype.attachedCallback = function() {
-  this._init();
-}
+  public getFocusMgr() {
+    return this._focusMgr
+  }
+
+  public clear() {
+    this.innerHTML = ''
+  }
+
+  public on_focus(event :CustomEvent) :boolean {
+    if (event.detail.elt.uIdx === this.uIdx) { // this test is necessary because the "focus" event is bubbled
+      this._console.log(this._logPrefix, this.debugName + ' has focus !')
+      this.focused = true;
+      this.setAttribute('data-focus', 'true');
+    }
+    else {
+      this.focusedChild = true
+    }
+    return true // we bubble the event in order to inform my ancestor that I have the focus
+  }
+
+  public on_blur(event :CustomEvent) :boolean {
+    if (event.detail.elt.uIdx === this.uIdx) { // this test is necessary because the "focus" event is bubbled
+      this._console.log(this._logPrefix, this.debugName + ' is now blurred !')
+      this.focused = false;
+      this.removeAttribute('data-focus');
+    }
+    else {
+      this.focusedChild = false
+    }
+    return true // we bubble the event in order to inform my ancestor that I have the focus
+  }
+
+  public on_select(event :CustomEvent) :boolean {
+    if (event.detail.elt.uIdx === this.uIdx) {
+      this._console.log(this._logPrefix, this.debugName + ' is now selected !')
+    }
+    return false // we do not bubble
+  }
+
+  public attachedCallback() {
+    this._init();
+  }
 
 
-EltPrototype.detachedCallback = function() {
-}
+  public detachedCallback() {
+  }
 
-EltPrototype.attributeChangedCallback = function(attrName/*, oldVal, newVal*/) {
+  public attributeChangedCallback(attrName, oldVal, newVal) {
+    if (attrName === 'data-enable') {
+      let enableFlag = (newVal === 'false' ||  newVal === '0') ? false : true
+      this.setEnableFlag(enableFlag)
+    }
+  }
 }
